@@ -52,7 +52,6 @@ def create_release_notes():
     notes += "---\n\n"
     notes += "## 🔧 Build Information\n\n"
     notes += f"- **Build Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
-    notes += "- **Auto-built:** Every 6 hours\n"
     notes += "- **Source:** Various ReVanced sources\n\n"
     notes += "## ⚠️ Disclaimer\n"
     notes += "These APKs are built automatically using the ReVanced patcher.\n"
