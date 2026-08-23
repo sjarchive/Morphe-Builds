@@ -15,7 +15,7 @@ on:
         description: 'Source name (from sources/ folder)'
         required: true
         type: string
-        default: 'revanced'
+        default: 'morphe'
       version:
         description: 'Specific version (leave empty for latest)'
         required: false
@@ -29,7 +29,7 @@ on:
           - arm64-v8a
           - armeabi-v7a
           - universal
-        default: 'universal'
+        default: 'arm64-v8a'
       replace_in_release:
         description: 'Replace APK in existing release'
         required: true
