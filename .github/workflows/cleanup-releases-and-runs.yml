@@ -1,0 +1,54 @@
+name: Cleanup Releases and Workflow History
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "DELETE" to confirm you want to wipe releases and workflow history'
+        required: true
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Verify confirmation
+        if: ${{ github.event.inputs.confirm != 'DELETE' }}
+        run: |
+          echo "Confirmation not provided. Set input 'confirm' to DELETE to proceed."
+          exit 1
+
+      - name: Delete all releases and their tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${{ github.repository }}"
+          releases=$(gh release list --repo "$repo" --limit 1000 --json tagName -q '.[].tagName')
+          for tag in $releases; do
+            echo "Deleting release and tag: $tag"
+            gh release delete "$tag" --repo "$repo" --yes --cleanup-tag
+          done
+
+      - name: Delete all remaining tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${{ github.repository }}"
+          tags=$(gh api "repos/$repo/tags" --paginate -q '.[].name')
+          for tag in $tags; do
+            echo "Deleting tag: $tag"
+            gh api -X DELETE "repos/$repo/git/refs/tags/$tag" || true
+          done
+
+      - name: Delete all workflow runs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${{ github.repository }}"
+          run_ids=$(gh run list --repo "$repo" --limit 1000 --json databaseId -q '.[].databaseId')
+          for id in $run_ids; do
+            echo "Deleting workflow run: $id"
+            gh api -X DELETE "repos/$repo/actions/runs/$id" || true
+          done
